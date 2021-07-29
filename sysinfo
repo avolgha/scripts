@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Warning: This script only works on Arch-based systems through the fact, that it uses at the updates checker the `checkupdates` command. 
+# This command is available on Arch-bases Systems through this package: https://aur.archlinux.org/packages/checkupdates%2Baur/
+#
+# Info: If you are using this script and you aren't a german speaking person or your system is not set to german, 
+# you have to change the "Speicher" in the `memory` variable to the name, you need. You can check what you need just by running the `free -h` command
+
 kernel="$(uname -r)"
 memory="$(free -h | awk '/^Speicher:/ {print $3 "/" $2}')"
 updates=$(checkupdates | wc -l)
