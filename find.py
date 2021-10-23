@@ -45,7 +45,7 @@ def main():
     ##
 
     ext_payload = args.extensions
-    extensions = ext_payload[1:len(ext_payload)-1].split(',')
+    extensions = ext_payload[0:len(ext_payload)].split(',')
     search = args.search
 
     ##
@@ -58,13 +58,14 @@ def main():
                 _, fe = os.path.splitext(file)
 
                 fpath = os.path.join(root, file)
-                if contains(extensions, fe):
+                if contains(extensions, fe[1:]):
                     with open(fpath) as f:
                         content = ''.join(f.read())
                         if contains(content, search):
                             print('[Success] ' + fpath)
-            except:
+            except Exception as e:
                 print('Error in file: ' + file)
+                print(e)
 
 # Only executes the script if it is runned by the console,
 # so it doesn't be runned if it gets imported by an
