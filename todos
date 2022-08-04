@@ -1,0 +1,58 @@
+#!/usr/bin/node
+const fs = require("fs");
+const path = require("path");
+
+function walk(dir = process.cwd()) {
+	let files = [];
+	dir = path.resolve(dir);
+
+	if (fs.statSync(dir).isFile()) {
+		return [ dir ];
+	} else {
+		const result = fs.readdirSync(dir);
+		for (const filename of result) {
+			const file = path.resolve(dir, filename);
+
+			if (fs.statSync(file).isDirectory()) {
+				if (
+					filename.includes("node_modules") ||
+					filename.includes("build")
+				) continue;
+				files.push(walk(file));	
+			} else {
+				files.push(file);
+			}
+		}                                                                                                                  
+	}
+
+	return files;
+}
+
+function searchForTodo(file) {
+	return fs.readFileSync(file, "utf-8")
+		.split("\n")
+		.map((s) => s.trim())
+		.map((s, idx) => {
+			const hasTodo = s.startsWith("// TODO") || s.startsWith("// FIXME");
+			return hasTodo ? ({
+				s,
+				line: idx + 1
+			}) : undefined;
+		})
+		.filter((obj) => obj !== undefined);
+}
+
+walk()
+	.flat()
+	.sort()
+	.map((file) => ({
+		file: path.relative(process.cwd(), file),
+		todos: searchForTodo(file),
+	}))
+	.filter(({ todos }) => todos.length > 0)
+	.forEach(({ file, todos }) => {
+		console.log("========== " + file);
+		console.log(todos.map(({ s, line }) => `[${line}] ${s}`)
+			.join("\n"));
+		console.log();
+	});
